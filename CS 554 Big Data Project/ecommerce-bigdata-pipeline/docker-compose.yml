@@ -1,0 +1,95 @@
+services:
+  # Zookeeper
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    platform: linux/amd64
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - bigdata-network
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    platform: linux/amd64
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    networks:
+      - bigdata-network
+
+  # Spark Master (using Jupyter's PySpark - most reliable)
+  spark-master:
+    image: jupyter/pyspark-notebook:spark-3.4.1
+    container_name: spark-master
+    platform: linux/amd64
+    user: root
+    command: start.sh
+    ports:
+      - "8080:8888"
+      - "7077:7077"
+      - "4040:4040"
+    environment:
+      GRANT_SUDO: "yes"
+      JUPYTER_ENABLE_LAB: "yes"
+    networks:
+      - bigdata-network
+    volumes:
+      - ./spark-processor:/home/jovyan/work
+      - ./data:/home/jovyan/data
+
+  # Kafka Producer
+  kafka-producer:
+    build: ./kafka-producer
+    container_name: kafka-producer
+    platform: linux/amd64
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC: ecommerce-events
+      EVENT_RATE: 100
+    networks:
+      - bigdata-network
+    volumes:
+      - ./data:/app/data
+    restart: on-failure
+
+  # Dashboard
+  dashboard:
+    build: ./dashboard
+    container_name: dashboard
+    platform: linux/amd64
+    ports:
+      - "8050:8050"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      HBASE_HOST: localhost
+      HBASE_PORT: 9090
+    depends_on:
+      - kafka
+    networks:
+      - bigdata-network
+    restart: on-failure
+
+networks:
+  bigdata-network:
+    driver: bridge
+
+volumes:
+  kafka-data:
+  spark-logs:
