@@ -630,8 +630,7 @@ For questions or issues:
 4. Contact team members listed at the top
 
 ---
-
-**Project Status:** Complete and operational  
+ 
 **Last Updated:** December 2025  
 **Course:** CSP-554 Big Data Technologies  
 **Institution:** Illinois Institute of Technology
