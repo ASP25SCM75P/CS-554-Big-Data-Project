@@ -38,12 +38,12 @@ sleep 20
 echo -e "${GREEN}✓ HBase is ready${NC}"
 
 # Check if Spark is ready
-echo -e "${YELLOW}Checking Spark...${NC}"
-until docker exec spark-master curl -s http://localhost:8080 > /dev/null 2>&1; do
-    echo "Waiting for Spark..."
-    sleep 5
-done
-echo -e "${GREEN}✓ Spark is ready${NC}"
+# echo -e "${YELLOW}Checking Spark...${NC}"
+# until docker exec spark-master curl -s http://localhost:8080 > /dev/null 2>&1; do
+#     echo "Waiting for Spark..."
+#     sleep 5
+# done
+# echo -e "${GREEN}✓ Spark is ready${NC}"
 
 echo ""
 echo -e "${GREEN}=========================================="
