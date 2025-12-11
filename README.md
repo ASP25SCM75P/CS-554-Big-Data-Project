@@ -143,6 +143,23 @@ The script will:
 2. Wait for services to be healthy (takes 1-2 minutes)
 3. Display status of all services
 
+**Note:** On some systems, the dashboard container may start before Kafka is fully ready.  
+If the dashboard loads but metrics remain zero after startup, run:
+
+```bash
+docker-compose restart dashboard
+```
+
+Then refresh:
+
+```
+http://localhost:8050
+```
+
+This ensures the dashboard reconnects to Kafka after Kafka becomes ready.
+
+---
+
 **Option B: Manual Start**
 
 ```bash
